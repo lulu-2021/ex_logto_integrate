@@ -11,6 +11,8 @@ defmodule SsoTest.Oidcc do
 
   """
 
+  import SsoTest.Oidcc.Generator
+
 
   def client(session_key) do
     %{
@@ -43,20 +45,11 @@ defmodule SsoTest.Oidcc do
   """
   def sign_in(redirect_url) do
     config = logto_config()
-    code_challenge = code_challenge()
+    code_challenge = generate_code_challenge()
 
   end
 
   #------ private functions -------#
-
-  defp code_challenge() do
-    verifier = code_verifier()
-
-  end
-
-  defp code_verifier do
-
-  end
 
   defp logto_config do
     %{

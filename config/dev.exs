@@ -4,7 +4,7 @@ import Config
 config :sso_test, SsoTest.Repo,
   username: "postgres",
   password: "CalamityIcelandBucket",
-  hostname: "192.168.178.199",
+  hostname: "192.168.30.36",
   database: "sso_test_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
