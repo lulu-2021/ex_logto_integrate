@@ -1,61 +1,26 @@
 
 defmodule SsoTest.Oidcc do
   @moduledoc """
-
-  from GO..
-
-  code_challenge = option.CodeChallenge
-  redirect_uri = option.RedirectUri
-  state = option.state
-  scopes = option.Scopes
-
   """
 
-  import SsoTest.Oidcc.Generator
-
-
-  def client(session_key) do
-    %{
-      logto_config: logto_config(),
-      session: %{session: session_key}
-    }
-
-  end
-
-  def generate_signin_uri do
-    callback_url = "http://lvh.me:4000/sso/callback"
-
-    client_id = "2a2yi37r08mv2ujr0dhf8"
-    client_secret = "qPl7Oc8Dxi1VGDDJwYpKjlL7WX99Xemj"
-    redirect_uri = ""
-    code_challenge = ""
-    code_challenge_method = "S256"
-    state = ""
-    scopes = []
-    response_type = "code"
-    prompt = "consent"
-
-  end
+  #def client(session_key) do
+  #  %{logto_config: logto_config(), session: %{session: session_key}}
+  #end
 
   @doc """
     here the redirect_url should be the callback url in our app..
-    i.e. "http://lvh.me:4000/sso/callback"
-    codeVerifier = core.generateCodeVerifier() # GO
-    codeChallenge = core.generateCodeChallenge(codeVerifier) # GO
   """
-  def sign_in(redirect_url) do
-    config = logto_config()
-    code_challenge = generate_code_challenge()
-
+  def sign_in() do
+    SsoTest.Oidcc.Client.sign_in(%LogtoClient{}, "http://lvh.me:4000/sso/callback")
   end
 
   #------ private functions -------#
 
-  defp logto_config do
-    %{
-      endpoint: "http://localhost:3001",
-      app_id: "2a2yi37r08mv2ujr0dhf8",
-      app_secret: "qPl7Oc8Dxi1VGDDJwYpKjlL7WX99Xemj"
-    }
-  end
+  #defp logto_config do
+  #  %{
+  #    endpoint: "http://localhost:3001",
+  #    app_id: "2a2yi37r08mv2ujr0dhf8",
+  #    app_secret: "qPl7Oc8Dxi1VGDDJwYpKjlL7WX99Xemj"
+  #  }
+  #end
 end

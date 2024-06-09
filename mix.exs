@@ -59,7 +59,8 @@ defmodule SsoTest.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.2"},
       {:httpoison, "~> 2.2"},
-      {:poison, "~> 5.0"}
+      {:poison, "~> 5.0"},
+      {:phx_gen_oidcc, "~> 0.1.0", only: [:dev], runtime: false},
     ]
   end
 

@@ -6,7 +6,7 @@ defmodule SsoTest.Oidcc.Core do
       and refresh token flow.
   """
 
-  @default_scopes ["UserScopeOrganizations"]
+  @default_scopes []#["UserScopeOrganizations"]
   @reserved_resource_organization "ReservedResourceOrganization"
 
   @doc """
@@ -39,24 +39,6 @@ defmodule SsoTest.Oidcc.Core do
       {:error, reason} -> {:error, reason}
     end
   end
-
-  defp build_queries(uri, client_id, redirect_uri, code_challenge, state, scopes, resources, prompt) do
-    queries =
-      uri.query
-      |> URI.decode_query()
-      |> Map.put("client_id", client_id)
-      |> Map.put("redirect_uri", redirect_uri)
-      |> Map.put("code_challenge", code_challenge)
-      |> Map.put("code_challenge_method", "S256")
-      |> Map.put("state", state)
-      |> Map.put("scope", build_scopes(scopes))
-      |> Map.put("response_type", "code")
-      |> Map.put("prompt", build_prompt(prompt))
-
-    resources = build_resources(scopes, resources)
-    Enum.reduce(resources, queries, fn resource, acc -> Map.put(acc, "resource", resource) end)
-  end
-
 
   @doc """
   Verifies and parses the code from the callback URI.
@@ -186,41 +168,69 @@ defmodule SsoTest.Oidcc.Core do
     end
   end
 
-    # ---------- private functions ---------- #
+  # ---------- private functions ---------- #
 
-    defp handle_url_parse_error({:ok, parsed_url}), do: {:ok, parsed_url}
-    defp handle_url_parse_error({:error, reason}), do: {:error, reason}
+  defp build_queries(uri, client_id, redirect_uri, code_challenge, state, scopes, resources, prompt) do
+    IO.puts "\n\n sign in data \n\n"
+    IO.inspect uri, label: "uri"
+    IO.inspect client_id, label: "client_id"
+    IO.inspect redirect_uri, label: "redirect_uri"
+    IO.inspect code_challenge, label: "code_challenge"
+    IO.inspect state, label: "state"
+    IO.inspect scopes, label: "scopes"
+    IO.inspect resources, label: "resources"
+    IO.inspect prompt, label: "prompt"
+    IO.puts "\n\n\n"
 
-    defp build_scopes(scopes) do
-      (scopes ++ @default_scopes)
-      |> Enum.uniq()
-      |> Enum.join(" ")
+    queries =
+      uri.query
+      |> decode_query()
+      |> Map.put("client_id", client_id)
+      |> Map.put("redirect_uri", redirect_uri)
+      |> Map.put("code_challenge", code_challenge)
+      |> Map.put("code_challenge_method", "S256")
+      |> Map.put("state", state)
+      |> Map.put("scope", build_scopes(scopes))
+      |> Map.put("response_type", "code")
+      |> Map.put("prompt", build_prompt(prompt))
+
+    resources = build_resources(scopes, resources)
+    Enum.reduce(resources, queries, fn resource, acc -> Map.put(acc, "resource", resource) end)
+  end
+
+  defp decode_query(nil), do: %{}
+  defp decode_query(q), do: URI.decode_query(q)
+
+  defp handle_url_parse_error({:ok, parsed_url}), do: {:ok, parsed_url}
+  defp handle_url_parse_error({:error, reason}), do: {:error, reason}
+
+  defp build_scopes(scopes) do
+    (scopes ++ @default_scopes)
+    |> Enum.uniq()
+    |> Enum.join(" ")
+  end
+
+  defp build_resources(scopes, resources) do
+    #if String.contains?(scopes, "UserScopeOrganizations") do
+    #  [@reserved_resource_organization | resources]
+    #else
+      resources
+    #end
+  end
+
+  defp build_prompt(prompt) do
+    if prompt == "", do: "consent", else: prompt
+  end
+
+  defp parse_url(url) do
+    case URI.parse(url) do
+      %URI{} = uri -> {:ok, uri}
+      {:error, reason} -> {:error, reason}
     end
+  end
 
-    defp build_resources(scopes, resources) do
-      if "UserScopeOrganizations" in scopes do
-        [@reserved_resource_organization | resources]
-      else
-        resources
-      end
-    end
-
-    defp build_prompt(prompt) do
-      if prompt == "", do: "consent", else: prompt
-    end
-
-    defp parse_url(url) do
-      case URI.parse(url) do
-        %URI{} = uri -> {:ok, uri}
-        {:error, reason} -> {:error, reason}
-      end
-    end
-
-    defp url_unescape(queries) do
-      case URI.decode_query(queries) do
-        queries when is_map(queries) -> {:ok, URI.encode_query(queries)}
-        {:error, reason} -> {:error, reason}
-      end
-    end
+  defp url_unescape(queries) do
+    {:ok, URI.encode_query(queries)}
+  end
 
 end

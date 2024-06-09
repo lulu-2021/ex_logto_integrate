@@ -6,4 +6,11 @@ defmodule SsoTestWeb.PageController do
     # so skip the default app layout.
     render(conn, :home, layout: false)
   end
+
+  def callback(conn, params) do
+    IO.inspect params, label: "callback params"
+
+    conn
+    |> redirect(to: "/")
+  end
 end

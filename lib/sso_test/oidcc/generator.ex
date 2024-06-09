@@ -7,9 +7,7 @@ defmodule SsoTest.Oidcc.Generator do
   @doc """
     generate the code challenge
   """
-  def generate_code_challenge() do
-    code_verifier = generate_code_verifier()
-
+  def generate_code_challenge(code_verifier) do
     :sha256
     |> :crypto.hash(code_verifier)
     |> Base.url_encode64(padding: false)
@@ -20,8 +18,7 @@ defmodule SsoTest.Oidcc.Generator do
   """
   def generate_state, do: generate_code_verifier()
 
-  # ------ private functions ------ #
-  defp generate_code_verifier do
+  def generate_code_verifier do
     @base
     |> :crypto.strong_rand_bytes()
     |> Base.encode64(padding: false)
