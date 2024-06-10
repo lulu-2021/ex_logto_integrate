@@ -34,7 +34,7 @@ defmodule SsoTest.Oidcc.Core do
     with {:ok, uri} <- parse_url(authorization_endpoint),
          queries = build_queries(uri, client_id, redirect_uri, code_challenge, state, scopes, resources, prompt),
          {:ok, unescaped_queries} <- url_unescape(queries) do
-      {:ok, "#{uri.scheme}://#{uri.host}#{uri.path}?#{unescaped_queries}"}
+      {:ok, "#{uri.scheme}://#{uri.host}:#{uri.port}#{uri.path}?#{unescaped_queries}"}
     else
       {:error, reason} -> {:error, reason}
     end
@@ -201,8 +201,12 @@ defmodule SsoTest.Oidcc.Core do
   defp decode_query(nil), do: %{}
   defp decode_query(q), do: URI.decode_query(q)
 
-  defp handle_url_parse_error({:ok, parsed_url}), do: {:ok, parsed_url}
-  defp handle_url_parse_error({:error, reason}), do: {:error, reason}
+  defp handle_url_parse_error(parsed_url), do: {:ok, parsed_url}
+  #
+  # do we need a fix for this?
+  #
+  #defp handle_url_parse_error({:ok, parsed_url}), do: {:ok, parsed_url}
+  #defp handle_url_parse_error({:error, reason}), do: {:error, reason}
 
   defp build_scopes(scopes) do
     (scopes ++ @default_scopes)

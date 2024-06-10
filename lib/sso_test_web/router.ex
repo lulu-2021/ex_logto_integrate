@@ -18,7 +18,9 @@ defmodule SsoTestWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
-    get "/sso/callback", PageController, :callback
+
+    get "/page/sso", PageController, :sign_in
+    get "/page/callback", PageController, :callback
   end
 
   # Other scopes may use custom stacks.

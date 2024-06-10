@@ -13,8 +13,8 @@ defmodule SsoTest.Oidcc.ClientConfig do
       client_id: @client_id,
       redirect_uri: redirect_uri,
       state: state,
-      scopes: ["read:user", "write:user"],
-      resources: ["http://lvh.me"],
+      scopes: ["openid"],
+      resources: [],
       prompt: @prompt
     }
   end
