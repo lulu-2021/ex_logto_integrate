@@ -5,7 +5,7 @@ end
 defmodule SsoTest.Oidcc.Client do
   @moduledoc """
   """
-  import SsoTest.Oidcc.Generator
+
   import SsoTest.Oidcc.RequestUtils
 
   @storage_key_sign_in_session "StorageKeySignInSession"
@@ -14,10 +14,8 @@ defmodule SsoTest.Oidcc.Client do
   Signs in the user and returns the sign-in URI.
   The `redirect_uri` here is the redirect uri in our app
   """
-  def sign_in(redirect_uri) do
-    code_verifier = generate_code_verifier()
-    code_challenge = generate_code_challenge(code_verifier)
-    state = generate_state()
+  def sign_in(redirect_uri, code_challenge, code_verifier, state) do
+
     signin_options = SsoTest.Oidcc.ClientConfig.signin_options(code_challenge, state, redirect_uri)
 
     case SsoTest.Oidcc.Core.generate_sign_in_uri(signin_options) do
@@ -41,6 +39,21 @@ defmodule SsoTest.Oidcc.Client do
       {:error, reason} ->
         {:error, reason}
     end
+  end
+
+  def process_callback(conn, redirect_uri, code_verifier, code) do
+    options = %{
+      token_endpoint: "http://localhost:3001/oidc/token/",
+      client_id: "2a2yi37r08mv2ujr0dhf8",
+      client_secret: "qPl7Oc8Dxi1VGDDJwYpKjlL7WX99Xemj",
+      redirect_uri: redirect_uri,
+      code_verifier: code_verifier,
+      code: code,
+    }
+    response = SsoTest.Oidcc.Core.fetch_token_by_authorization_code(options)
+    IO.inspect response, label: "process callback response"
+
+    :ok
   end
 
   def handle_sign_in_callback(request, logto_client) do

@@ -52,7 +52,26 @@ defmodule SsoTest.Oidcc.Core do
     - {:ok, code} (tuple): The code if the verification is successful.
     - {:error, reason} (tuple): The error reason if the verification fails.
   """
+  def get_code_from_callback_uri(callback_uri) do
+    uri = callback_uri
+    |> URI.parse()
+
+    decoded = uri.query
+    |> URI.decode_query()
+
+    %{"code" => code} = decoded
+
+    code
+  end
+
   def verify_and_parse_code_from_callback_uri(callback_uri, redirect_uri, state) do
+
+    IO.puts "\n\n verifying code from callback_uri"
+    IO.inspect callback_uri
+    IO.inspect redirect_uri
+    IO.inspect state
+    IO.puts "\n\n end \n\n"
+
     with true <- String.starts_with?(callback_uri, redirect_uri),
          {:ok, parsed_url} <- URI.parse(callback_uri) |> handle_url_parse_error(),
          "" <- parsed_url.query |> URI.decode_query() |> Map.get("error"),
@@ -94,6 +113,7 @@ defmodule SsoTest.Oidcc.Core do
   Returns a `%{access_token: ..., refresh_token: ..., ...}` map on success, or an error tuple.
   """
   def fetch_token_by_authorization_code(options) do
+    IO.inspect options, label: "options"
     body =
       URI.encode_query(%{
         client_id: options[:client_id],
@@ -110,6 +130,10 @@ defmodule SsoTest.Oidcc.Core do
       if options[:client_secret],
         do: [hackney: [basic_auth: {options[:client_id], options[:client_secret]}]],
         else: []
+
+    IO.inspect auth, label: "auth"
+    IO.inspect body, label: "body"
+    IO.inspect headers, label: "headers"
 
     case HTTPoison.post(options[:token_endpoint], body, headers, auth) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
