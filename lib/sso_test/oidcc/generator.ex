@@ -25,13 +25,7 @@ defmodule SsoTest.Oidcc.Generator do
   def generate_code_verifier do
     symbols = '0123456789abcdef'
     symbol_count = Enum.count(symbols)
-    for _ <- 1..64, into: "", do: <<rand_char(symbols, symbol_count)>>
-  end
-
-  def generate_code_verifier_v2 do
-    @base
-    |> :crypto.strong_rand_bytes()
-    |> Base.encode64(padding: false)
+    for _ <- 1..@base, into: "", do: <<rand_char(symbols, symbol_count)>>
   end
 
   defp rand_char(symbols, count) do
