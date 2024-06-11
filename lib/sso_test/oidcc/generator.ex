@@ -1,6 +1,10 @@
 defmodule SsoTest.Oidcc.Generator do
   @moduledoc """
     some random number, base64 encoding helper functions
+
+    - deprecated :crypto.rand_uniform - replaced with :rand.uniform - needed to do some recursion..
+    #for _ <- 1..64, into: "", do: <<Enum.at(symbols, :crypto.rand_uniform(0, symbol_count))>>
+
   """
   @base 64
 
@@ -21,12 +25,19 @@ defmodule SsoTest.Oidcc.Generator do
   def generate_code_verifier do
     symbols = '0123456789abcdef'
     symbol_count = Enum.count(symbols)
-    for _ <- 1..64, into: "", do: <<Enum.at(symbols, :crypto.rand_uniform(0, symbol_count))>>
+    for _ <- 1..64, into: "", do: <<rand_char(symbols, symbol_count)>>
   end
 
   def generate_code_verifier_v2 do
     @base
     |> :crypto.strong_rand_bytes()
     |> Base.encode64(padding: false)
+  end
+
+  defp rand_char(symbols, count) do
+    case Enum.at(symbols, :rand.uniform(count)) do
+      nil -> rand_char(symbols, count)
+      result -> result
+    end
   end
 end

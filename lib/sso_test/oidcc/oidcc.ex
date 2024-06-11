@@ -1,26 +1,34 @@
 
 defmodule SsoTest.Oidcc do
   @moduledoc """
-  """
 
-  #def client(session_key) do
-  #  %{logto_config: logto_config(), session: %{session: session_key}}
-  #end
+  """
+  alias SsoTest.Oidcc.{Core, Client, ClientConfig, RequestUtils}
 
   @doc """
     here the redirect_url should be the callback url in our app..
   """
-  def sign_in() do
-    SsoTest.Oidcc.Client.sign_in(%LogtoClient{}, "http://lvh.me:4000/sso/callback")
+  def sign_in(code_verifier, code_challenge, state) do
+    case Client.sign_in(@callback_url, code_challenge, code_verifier, state) do
+      {:ok, sign_in_uri} ->
+        {:ok, sign_in_uri}
+      {:error, message} ->
+        {:error, message}
+    end
+  end
+
+  def handle_signin_callback(conn, session) do
+    code_verifier = get_code_verifier(session)
+    callback_uri = RequestUtils.get_origin_request_url(conn)
+    code = Core.get_code_from_callback_uri(callback_uri)
+    response = ClientConfig.callback_url()
+    |> Client.process_callback(code_verifier, code)
+
+    IO.inspect response, label: "client handle signin callback response"
+    conn
   end
 
   #------ private functions -------#
+  defp get_code_verifier(%{"code_verifier" => code_verifier}), do: code_verifier
 
-  #defp logto_config do
-  #  %{
-  #    endpoint: "http://localhost:3001",
-  #    app_id: "2a2yi37r08mv2ujr0dhf8",
-  #    app_secret: "qPl7Oc8Dxi1VGDDJwYpKjlL7WX99Xemj"
-  #  }
-  #end
 end

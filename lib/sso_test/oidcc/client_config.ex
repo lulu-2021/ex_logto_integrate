@@ -2,6 +2,7 @@ defmodule SsoTest.Oidcc.ClientConfig do
   @moduledoc """
   """
 
+  @callback_url "http://lvh.me:4000/page/callback"
   @authorization_endpoint "http://localhost:3001/oidc/auth/"
   @client_id "2a2yi37r08mv2ujr0dhf8"
   @prompt "consent"
@@ -18,4 +19,6 @@ defmodule SsoTest.Oidcc.ClientConfig do
       prompt: @prompt
     }
   end
+
+  def callback_url, do: @callback_url
 end

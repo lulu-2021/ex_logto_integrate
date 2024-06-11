@@ -7,7 +7,6 @@ defmodule SsoTest.Oidcc.Core do
   """
 
   @default_scopes []#["UserScopeOrganizations"]
-  @reserved_resource_organization "ReservedResourceOrganization"
 
   @doc """
   Generates a sign-in URI based on the provided options.
@@ -64,39 +63,6 @@ defmodule SsoTest.Oidcc.Core do
     code
   end
 
-  def verify_and_parse_code_from_callback_uri(callback_uri, redirect_uri, state) do
-
-    IO.puts "\n\n verifying code from callback_uri"
-    IO.inspect callback_uri
-    IO.inspect redirect_uri
-    IO.inspect state
-    IO.puts "\n\n end \n\n"
-
-    with true <- String.starts_with?(callback_uri, redirect_uri),
-         {:ok, parsed_url} <- URI.parse(callback_uri) |> handle_url_parse_error(),
-         "" <- parsed_url.query |> URI.decode_query() |> Map.get("error"),
-         state_in_uri <- parsed_url.query |> URI.decode_query() |> Map.get("state"),
-         state_in_uri == state,
-         code <- parsed_url.query |> URI.decode_query() |> Map.get("code"),
-         "" != code do
-      {:ok, code}
-    else
-      false ->
-        {:error, :callback_uri_not_match_redirect_uri}
-
-      {:error, reason} ->
-        {:error, reason}
-
-      "" ->
-        {:error, :code_not_found_in_callback_uri}
-
-      _state_in_uri ->
-        {:error, :state_not_match}
-    end
-  end
-
-
-
   @doc """
   Fetches an access token using the authorization code flow.
 
@@ -113,7 +79,6 @@ defmodule SsoTest.Oidcc.Core do
   Returns a `%{access_token: ..., refresh_token: ..., ...}` map on success, or an error tuple.
   """
   def fetch_token_by_authorization_code(options) do
-    IO.inspect options, label: "options"
     body =
       URI.encode_query(%{
         client_id: options[:client_id],
@@ -130,10 +95,6 @@ defmodule SsoTest.Oidcc.Core do
       if options[:client_secret],
         do: [hackney: [basic_auth: {options[:client_id], options[:client_secret]}]],
         else: []
-
-    IO.inspect auth, label: "auth"
-    IO.inspect body, label: "body"
-    IO.inspect headers, label: "headers"
 
     case HTTPoison.post(options[:token_endpoint], body, headers, auth) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
@@ -195,16 +156,16 @@ defmodule SsoTest.Oidcc.Core do
   # ---------- private functions ---------- #
 
   defp build_queries(uri, client_id, redirect_uri, code_challenge, state, scopes, resources, prompt) do
-    IO.puts "\n\n sign in data \n\n"
-    IO.inspect uri, label: "uri"
-    IO.inspect client_id, label: "client_id"
-    IO.inspect redirect_uri, label: "redirect_uri"
-    IO.inspect code_challenge, label: "code_challenge"
-    IO.inspect state, label: "state"
-    IO.inspect scopes, label: "scopes"
-    IO.inspect resources, label: "resources"
-    IO.inspect prompt, label: "prompt"
-    IO.puts "\n\n\n"
+    #IO.puts "\n\n sign in data \n\n"
+    #IO.inspect uri, label: "uri"
+    #IO.inspect client_id, label: "client_id"
+    #IO.inspect redirect_uri, label: "redirect_uri"
+    #IO.inspect code_challenge, label: "code_challenge"
+    #IO.inspect state, label: "state"
+    #IO.inspect scopes, label: "scopes"
+    #IO.inspect resources, label: "resources"
+    #IO.inspect prompt, label: "prompt"
+    #IO.puts "\n\n\n"
 
     queries =
       uri.query
@@ -225,25 +186,14 @@ defmodule SsoTest.Oidcc.Core do
   defp decode_query(nil), do: %{}
   defp decode_query(q), do: URI.decode_query(q)
 
-  defp handle_url_parse_error(parsed_url), do: {:ok, parsed_url}
-  #
-  # do we need a fix for this?
-  #
-  #defp handle_url_parse_error({:ok, parsed_url}), do: {:ok, parsed_url}
-  #defp handle_url_parse_error({:error, reason}), do: {:error, reason}
-
   defp build_scopes(scopes) do
     (scopes ++ @default_scopes)
     |> Enum.uniq()
     |> Enum.join(" ")
   end
 
-  defp build_resources(scopes, resources) do
-    #if String.contains?(scopes, "UserScopeOrganizations") do
-    #  [@reserved_resource_organization | resources]
-    #else
-      resources
-    #end
+  defp build_resources(_scopes, resources) do
+    resources
   end
 
   defp build_prompt(prompt) do
@@ -260,5 +210,4 @@ defmodule SsoTest.Oidcc.Core do
   defp url_unescape(queries) do
     {:ok, URI.encode_query(queries)}
   end
-
 end
