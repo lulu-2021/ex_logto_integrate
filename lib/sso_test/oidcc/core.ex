@@ -1,3 +1,8 @@
+#defmodule SsoTest.Oidcc.UserInfo do
+#  @derive [Poison.Encoder]
+#  defstruct [:field1, :field2]
+#end
+
 defmodule SsoTest.Oidcc.Core do
   @moduledoc """
     - Module for generating sign-in URIs.
@@ -7,6 +12,9 @@ defmodule SsoTest.Oidcc.Core do
   """
 
   @default_scopes []#["UserScopeOrganizations"]
+  require HTTPoison
+
+  alias SsoTest.Oidcc.ClientConfig
 
   @doc """
   Generates a sign-in URI based on the provided options.
@@ -147,6 +155,24 @@ defmodule SsoTest.Oidcc.Core do
 
       {:ok, %HTTPoison.Response{status_code: status_code, body: body}} ->
         {:error, "HTTP #{status_code}: #{body}"}
+
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        {:error, reason}
+    end
+  end
+
+  def fetch_user_info(access_token) do
+    user_info_endpoint = ClientConfig.user_info_endpoint()
+
+    headers = [{"Authorization", "Bearer #{access_token}"}]
+
+    case HTTPoison.get(user_info_endpoint, headers) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        # {:ok, Poison.decode!(body, as: %SsoTest.Oidcc.UserInfo{})}
+        {:ok, Poison.decode!(body, as: %{})}
+
+      {:ok, %HTTPoison.Response{status_code: status_code, body: body}} ->
+        {:error, %{status_code: status_code, body: body}}
 
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:error, reason}

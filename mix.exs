@@ -61,7 +61,8 @@ defmodule SsoTest.MixProject do
       {:certifi, "~> 2.4"},
       {:ssl_verify_fun, "~> 1.1"},
       {:httpoison, "~> 2.2"},
-      {:poison, "~> 6.0.0"}
+      {:poison, "~> 6.0.0"},
+      {:jose, "~> 1.11"}
     ]
   end
 

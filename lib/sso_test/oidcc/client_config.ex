@@ -5,6 +5,7 @@ defmodule SsoTest.Oidcc.ClientConfig do
   @callback_url "http://lvh.me:4000/page/callback"
   @authorization_endpoint "http://localhost:3001/oidc/auth/"
   @token_endpoint "http://localhost:3001/oidc/token/"
+  @user_info_endpoint "http://localhost:3001/oidc/me"
   @client_id "2a2yi37r08mv2ujr0dhf8"
   @client_secret "qPl7Oc8Dxi1VGDDJwYpKjlL7WX99Xemj"
   @prompt "consent"
@@ -27,4 +28,6 @@ defmodule SsoTest.Oidcc.ClientConfig do
   def client_id, do: @client_id
   def client_secret, do: @client_secret
   def token_endpoint, do: @token_endpoint
+
+  def user_info_endpoint, do: @user_info_endpoint
 end
