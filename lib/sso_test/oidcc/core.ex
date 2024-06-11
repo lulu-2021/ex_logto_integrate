@@ -169,6 +169,18 @@ defmodule SsoTest.Oidcc.Core do
     case HTTPoison.get(user_info_endpoint, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         # {:ok, Poison.decode!(body, as: %SsoTest.Oidcc.UserInfo{})}
+
+        #
+        # Here we need to work out how to pull all the user data and transform this into..
+        # then
+        # match / merge this info into the current user OR create a new one etc..
+        #
+        # ALSO we need to store the tokens and expiry data on the user record so that we can use
+        # for further requests
+        #
+
+        IO.inspect body, label: "user info body"
+
         {:ok, Poison.decode!(body, as: %{})}
 
       {:ok, %HTTPoison.Response{status_code: status_code, body: body}} ->
