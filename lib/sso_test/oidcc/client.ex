@@ -33,14 +33,14 @@ defmodule SsoTest.Oidcc.Client do
 
   def process_callback(redirect_uri, code_verifier, code) do
     options = %{
-      token_endpoint: "http://localhost:3001/oidc/token/",
-      client_id: "2a2yi37r08mv2ujr0dhf8",
-      client_secret: "qPl7Oc8Dxi1VGDDJwYpKjlL7WX99Xemj",
+      token_endpoint: ClientConfig.token_endpoint(),
+      client_id: ClientConfig.client_id(),
+      client_secret: ClientConfig.client_secret(),
       redirect_uri: redirect_uri,
       code_verifier: code_verifier,
       code: code,
     }
-    SsoTest.Oidcc.Core.fetch_token_by_authorization_code(options)
+    Core.fetch_token_by_authorization_code(options)
   end
 
 end

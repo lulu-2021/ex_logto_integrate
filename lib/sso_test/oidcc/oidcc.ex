@@ -9,7 +9,9 @@ defmodule SsoTest.Oidcc do
     here the redirect_url should be the callback url in our app..
   """
   def sign_in(code_verifier, code_challenge, state) do
-    case Client.sign_in(@callback_url, code_challenge, code_verifier, state) do
+    ClientConfig.callback_url()
+    |> Client.sign_in(code_challenge, code_verifier, state)
+    |> case do
       {:ok, sign_in_uri} ->
         {:ok, sign_in_uri}
       {:error, message} ->
