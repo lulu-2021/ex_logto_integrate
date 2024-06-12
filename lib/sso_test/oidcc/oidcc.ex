@@ -53,13 +53,15 @@ defmodule SsoTest.Oidcc do
     end
   end
 
-  defp decode_claims(%{"id_token" => id_token} = token_map) do
+  defp decode_claims(%{"id_token" => id_token, "refresh_token" => refresh_token} = token_map) do
     IO.inspect token_map, label: "token_map"
 
     response = id_token
-    |> Token.decode_id_token()
+    |> Token.decode_token()
 
     IO.inspect response, label: "id token claims"
+
+    IO.inspect refresh_token, label: "refresh token"
 
     token_map
   end

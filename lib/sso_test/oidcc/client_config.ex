@@ -17,7 +17,7 @@ defmodule SsoTest.Oidcc.ClientConfig do
       client_id: @client_id,
       redirect_uri: redirect_uri,
       state: state,
-      scopes: ["openid"],
+      scopes: ["openid", "offline_access"],
       resources: [],
       prompt: @prompt
     }

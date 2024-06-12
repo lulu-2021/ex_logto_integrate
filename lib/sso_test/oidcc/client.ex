@@ -38,9 +38,13 @@ defmodule SsoTest.Oidcc.Client do
       client_secret: ClientConfig.client_secret(),
       redirect_uri: redirect_uri,
       code_verifier: code_verifier,
-      code: code,
+      code: code
     }
     Core.fetch_token_by_authorization_code(options)
+  end
+
+  def sign_out do
+
   end
 
 end

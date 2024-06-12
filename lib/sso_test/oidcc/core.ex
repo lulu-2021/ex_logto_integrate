@@ -66,6 +66,8 @@ defmodule SsoTest.Oidcc.Core do
     decoded = uri.query
     |> URI.decode_query()
 
+    #IO.inspect decoded, label: "decoded callback uri"
+
     %{"code" => code} = decoded
 
     code
@@ -130,6 +132,16 @@ defmodule SsoTest.Oidcc.Core do
   - `:organization_id` - The organization ID (optional).
 
   Returns a `%{access_token: ..., refresh_token: ..., ...}` map on success, or an error tuple.
+
+  options = %{
+    client_id: "2a2yi37r08mv2ujr0dhf8",
+    refresh_token: "???", NB - this is meant to come with the initial token request?
+    client_secret: "qPl7Oc8Dxi1VGDDJwYpKjlL7WX99Xemj",
+    token_endpoint: "http://localhost:3001/oidc/token/"
+  }
+  SsoTest.Oidcc.Core.fetch_token_by_refresh_token(options)
+
+
   """
   def fetch_token_by_refresh_token(options) do
     body =
@@ -179,8 +191,6 @@ defmodule SsoTest.Oidcc.Core do
         # for further requests
         #
 
-        IO.inspect body, label: "user info body"
-
         {:ok, Poison.decode!(body, as: %{})}
 
       {:ok, %HTTPoison.Response{status_code: status_code, body: body}} ->
@@ -190,6 +200,11 @@ defmodule SsoTest.Oidcc.Core do
         {:error, reason}
     end
   end
+
+  def get_refresh_token do
+
+  end
+
 
   # ---------- private functions ---------- #
 
