@@ -1,4 +1,10 @@
 defmodule SsoTestWeb.PageController do
+  @moduledoc """
+
+  - steve
+  - MFcpiiGx
+
+  """
   use SsoTestWeb, :controller
 
   import SsoTest.Oidcc.Generator
@@ -79,6 +85,26 @@ defmodule SsoTestWeb.PageController do
 
         conn
         |> put_flash(:error, "Token refresh failed: #{inspect error}")
+        |> render(:home, layout: false)
+    end
+  end
+
+  def end_session(conn, _params) do
+    options = %{
+      client_id: SsoTest.Oidcc.ClientConfig.client_id(),
+      end_session_endpoint: SsoTest.Oidcc.ClientConfig.end_session_endpoint(),
+      post_logout_redirect_uri: SsoTest.Oidcc.ClientConfig.post_logout_redirect_url()
+    }
+    case SsoTest.Oidcc.Core.generate_sign_out_uri(options) do
+      {:ok, logout_url} ->
+
+        conn
+        |> put_flash(:info, "Logout successful!")
+        |> redirect(external: logout_url)
+
+      {:error, error} ->
+        conn
+        |> put_flash(:info, "Logout uri generation failed #{inspect error}")
         |> render(:home, layout: false)
     end
   end

@@ -1,8 +1,3 @@
-#defmodule SsoTest.Oidcc.UserInfo do
-#  @derive [Poison.Encoder]
-#  defstruct [:field1, :field2]
-#end
-
 defmodule SsoTest.Oidcc.Core do
   @moduledoc """
     - Module for generating sign-in URIs.
@@ -46,6 +41,50 @@ defmodule SsoTest.Oidcc.Core do
       {:error, reason} -> {:error, reason}
     end
   end
+
+  @doc """
+  """
+  #def __generate_sign_out_uri(options) do
+  #  with {:ok, uri} <- URI.parse(options.end_session_endpoint),
+  #        queries = URI.query_to_map(uri.query || ""),
+  #        queries = Map.put(queries, "client_id", options.client_id),
+  #        queries = if options.post_logout_redirect_uri != "", do: Map.put(queries, "post_logout_redirect_uri", options.post_logout_redirect_uri), else: queries,
+  #        queries = URI.encode_query(queries),
+  #        do: "#{uri.scheme}://#{uri.host}#{uri.path}?#{queries}"
+  #end
+
+  def generate_sign_out_uri(options) do
+    case parse_url(options.end_session_endpoint) do
+      {:ok, uri} ->
+        queries = uri.query
+        |> build_logout_query(options)
+
+        logout_url = "#{uri.scheme}://#{uri.host}:#{uri.port}#{uri.path}?#{queries}"
+
+        {:ok, logout_url}
+
+      {:error, error} ->
+        {:error, error}
+    end
+  end
+
+  defp build_logout_query(query, options) do
+    query
+    |> decode_query()
+    |> Map.put("cliend_id", options.client_id)
+    |> add_post_logout_uri_to_queries(options)
+    |> uri_encode_queries()
+  end
+
+  defp add_post_logout_uri_to_queries(queries, options) do
+    if options.post_logout_redirect_uri != "" do
+      Map.put(queries, "post_logout_redirect_uri", options.post_logout_redirect_uri)
+    else
+      queries
+    end
+  end
+
+  defp uri_encode_queries(queries), do: URI.encode_query(queries)
 
   @doc """
   Verifies and parses the code from the callback URI.
@@ -227,7 +266,7 @@ defmodule SsoTest.Oidcc.Core do
   defp parse_url(url) do
     case URI.parse(url) do
       %URI{} = uri -> {:ok, uri}
-      {:error, reason} -> {:error, reason}
+      error -> {:error, error}
     end
   end
 
