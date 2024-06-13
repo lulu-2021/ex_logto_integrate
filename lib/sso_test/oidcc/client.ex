@@ -20,7 +20,6 @@ defmodule SsoTest.Oidcc.Client do
           state: state
         }
 
-        IO.inspect sign_in_session, label: ">>> sign_in_session"
         {:ok, sign_in_session_json_value} = Jason.encode(sign_in_session)
         storage = %{} |> Map.put(:storage_key_sign_in_session, sign_in_session_json_value)
         IO.inspect storage, label: "session storage for later validation"

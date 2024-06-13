@@ -11,7 +11,7 @@ defmodule SsoTest.Oidcc.Core do
       and refresh token flow.
   """
 
-  @default_scopes []#["UserScopeOrganizations"]
+  @default_scopes []
   require HTTPoison
 
   alias SsoTest.Oidcc.ClientConfig
@@ -65,8 +65,6 @@ defmodule SsoTest.Oidcc.Core do
 
     decoded = uri.query
     |> URI.decode_query()
-
-    #IO.inspect decoded, label: "decoded callback uri"
 
     %{"code" => code} = decoded
 
@@ -180,17 +178,6 @@ defmodule SsoTest.Oidcc.Core do
 
     case HTTPoison.get(user_info_endpoint, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        # {:ok, Poison.decode!(body, as: %SsoTest.Oidcc.UserInfo{})}
-
-        #
-        # Here we need to work out how to pull all the user data and transform this into..
-        # then
-        # match / merge this info into the current user OR create a new one etc..
-        #
-        # ALSO we need to store the tokens and expiry data on the user record so that we can use
-        # for further requests
-        #
-
         {:ok, Poison.decode!(body, as: %{})}
 
       {:ok, %HTTPoison.Response{status_code: status_code, body: body}} ->
@@ -201,25 +188,9 @@ defmodule SsoTest.Oidcc.Core do
     end
   end
 
-  def get_refresh_token do
-
-  end
-
-
   # ---------- private functions ---------- #
 
   defp build_queries(uri, client_id, redirect_uri, code_challenge, state, scopes, resources, prompt) do
-    #IO.puts "\n\n sign in data \n\n"
-    #IO.inspect uri, label: "uri"
-    #IO.inspect client_id, label: "client_id"
-    #IO.inspect redirect_uri, label: "redirect_uri"
-    #IO.inspect code_challenge, label: "code_challenge"
-    #IO.inspect state, label: "state"
-    #IO.inspect scopes, label: "scopes"
-    #IO.inspect resources, label: "resources"
-    #IO.inspect prompt, label: "prompt"
-    #IO.puts "\n\n\n"
-
     queries =
       uri.query
       |> decode_query()

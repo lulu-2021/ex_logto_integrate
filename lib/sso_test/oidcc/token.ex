@@ -15,5 +15,6 @@ defmodule SsoTest.Oidcc.Token do
   - {:ok, id_token_claims} on success.
   - {:error, reason} on failure.
   """
-  def decode_token(token), do: JOSE.JWS.peek_payload(token)
+  def unpack_token(token), do: JOSE.JWS.peek_payload(token)
+  def decode_token(token), do: Poison.decode(token, %{})
 end

@@ -2,7 +2,7 @@ defmodule SsoTestWeb.PageController do
   use SsoTestWeb, :controller
 
   import SsoTest.Oidcc.Generator
-  alias SsoTest.Oidcc
+  alias SsoTest.{Oidcc, Oidcc.RequestUtils}
 
   def home(conn, _params) do
     # The home page is often custom made,
@@ -35,11 +35,29 @@ defmodule SsoTestWeb.PageController do
     fetched_conn = conn
     |> fetch_session()
 
-    session = fetched_conn.private.plug_session
+    callback_uri = RequestUtils.get_origin_request_url(conn)
 
-    conn
-    |> Oidcc.handle_signin_callback(session)
-    |> render(:home, layout: false)
+    fetched_conn.private.plug_session
+    |> Oidcc.handle_signin_callback(callback_uri)
+    |> case do
+      {:ok, decoded_tokens} ->
+
+        IO.inspect decoded_tokens, label: "decoded tokens"
+
+        conn
+        |> put_flash(:info, "user authenticated successfully!")
+        |> put_session(:tokens, decoded_tokens)
+        |> render(:home, layout: false)
+
+      {:error, message} ->
+
+        IO.inspect message, label: "authentication failed:"
+
+        conn
+        |> put_flash(:error, "user authentication failed!")
+        |> put_session(:tokens, nil)
+        |> render(:home, layout: false)
+    end
   end
 
 end

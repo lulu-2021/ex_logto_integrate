@@ -3,7 +3,7 @@ defmodule SsoTest.Oidcc do
   @moduledoc """
 
   """
-  alias SsoTest.Oidcc.{Core, Client, ClientConfig, RequestUtils, Token}
+  alias SsoTest.Oidcc.{Core, Client, ClientConfig, Token}
 
   @doc """
     here the redirect_url should be the callback url in our app..
@@ -19,50 +19,74 @@ defmodule SsoTest.Oidcc do
     end
   end
 
-  def handle_signin_callback(conn, session) do
+  def handle_signin_callback(session, callback_uri) do
     code_verifier = get_code_verifier(session)
-    callback_uri = RequestUtils.get_origin_request_url(conn)
     code = Core.get_code_from_callback_uri(callback_uri)
-    response = ClientConfig.callback_url()
+    ClientConfig.callback_url()
     |> Client.process_callback(code_verifier, code)
     |> case do
       {:ok, token_map} ->
         token_map
-        |> decode_claims()
+        |> decode_token()
         |> user_info()
 
       {:error, message} ->
-        IO.inspect message, label: "signing callback failed"
+        #IO.inspect message, label: "signing callback failed"
+        {:error, message}
     end
+  end
 
-    IO.inspect response, label: "client handle signin callback response"
-    conn
+  def refresh_token(refresh_token) do
+    %{
+      refresh_token: refresh_token,
+      client_id: ClientConfig.client_id(),
+      client_secret: ClientConfig.client_secret(),
+      token_endpoint: ClientConfig.token_endpoint()
+    }
+    |> Core.fetch_token_by_refresh_token()
+    |> case do
+      {:ok, refreshed_token_map} ->
+        refreshed_token_map
+        |> decode_token()
+        |> user_info()
+
+      {:error, reason} ->
+        {:error, reason}
+    end
   end
 
   #------ private functions -------#
   defp get_code_verifier(%{"code_verifier" => code_verifier}), do: code_verifier
 
-  defp user_info(%{"access_token" => access_token}) do
+  defp user_info(%{access_token: access_token} = data) do
     access_token
     |> Core.fetch_user_info()
     |> case do
       {:ok, user_info} ->
-        IO.inspect user_info, label: "user info"
-      {:error, data} ->
-        IO.inspect data, label: "user info fetch failed"
+        #IO.inspect user_info, label: "user info"
+        {:ok, Map.put(data, :user_info, user_info)}
+      {:error, error} ->
+        #IO.inspect error, label: "user info fetch failed"
+        {:error, error}
     end
   end
 
-  defp decode_claims(%{"id_token" => id_token, "refresh_token" => refresh_token} = token_map) do
-    IO.inspect token_map, label: "token_map"
-
-    response = id_token
+  defp decode_token(%{"id_token" => id, "refresh_token" => refresh, "access_token" => access, "expires_in" => exp}) do
+    id
+    |> Token.unpack_token()
     |> Token.decode_token()
+    |> case do
+      {:ok, decoded_id_token} ->
+        %{
+          access_token: access,
+          id_token: decoded_id_token,
+          refresh_token: refresh,
+          expires_in: exp,
+          expires_at: :os.system_time(:seconds) + exp
+        }
 
-    IO.inspect response, label: "id token claims"
-
-    IO.inspect refresh_token, label: "refresh token"
-
-    token_map
+      {:error, error} ->
+        {:error, error}
+    end
   end
 end
