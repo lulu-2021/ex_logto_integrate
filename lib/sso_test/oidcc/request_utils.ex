@@ -12,6 +12,8 @@ defmodule SsoTest.Oidcc.RequestUtils do
     request_protocol(conn) <> "://" <> conn.host <> ":" <> conn_port(conn) <> conn.request_path <> "/?" <> conn.query_string
   end
 
+  # ----------- private functions ----------- #
+
   defp conn_port(conn), do: "#{conn.port}"
 
   defp request_protocol(conn) do

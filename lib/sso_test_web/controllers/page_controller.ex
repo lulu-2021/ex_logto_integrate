@@ -7,19 +7,19 @@ defmodule SsoTestWeb.PageController do
   """
   use SsoTestWeb, :controller
 
-  import SsoTest.Oidcc.Generator
-  alias SsoTest.{Oidcc, Oidcc.RequestUtils}
+  alias SsoTest.Oidcc
 
   def home(conn, _params) do
-    # The home page is often custom made,
-    # so skip the default app layout.
-    render(conn, :home, layout: false)
+    authenticated = conn
+    |> Oidcc.is_authenticated?()
+
+    render(conn, :home, layout: false, authenticated: authenticated)
   end
 
   def sign_in(conn, _params) do
-    code_verifier = generate_code_verifier()
-    code_challenge = generate_code_challenge(code_verifier)
-    state = generate_state()
+    code_verifier = Oidcc.code_verifier()
+    code_challenge = Oidcc.code_challenge(code_verifier)
+    state = Oidcc.state()
 
     case Oidcc.sign_in(code_verifier, code_challenge, state) do
       {:ok, sign_in_uri} ->
@@ -33,7 +33,7 @@ defmodule SsoTestWeb.PageController do
       {:error, _message} ->
         conn
         |> put_flash(:error, "Signin request failed!")
-        |> render(:home, layout: false)
+        |> render(:home, layout: false, authenticated: true)
     end
   end
 
@@ -41,7 +41,7 @@ defmodule SsoTestWeb.PageController do
     fetched_conn = conn
     |> fetch_session()
 
-    callback_uri = RequestUtils.get_origin_request_url(conn)
+    callback_uri = Oidcc.get_origin_request_url(conn)
 
     fetched_conn.private.plug_session
     |> Oidcc.handle_signin_callback(callback_uri)
@@ -53,14 +53,14 @@ defmodule SsoTestWeb.PageController do
         conn
         |> put_flash(:info, "user authenticated successfully!")
         |> put_session(:tokens, decoded_tokens)
-        |> render(:home, layout: false)
+        |> render(:home, layout: false, authenticated: true)
 
       {:error, error} ->
 
         conn
         |> put_flash(:error, "user authentication failed #{inspect error}!")
         |> put_session(:tokens, nil)
-        |> render(:home, layout: false)
+        |> render(:home, layout: false, authenticated: false)
     end
   end
 
@@ -77,35 +77,37 @@ defmodule SsoTestWeb.PageController do
       {:ok, tokens} ->
         IO.inspect tokens, label: "refreshed tokens"
 
+        authenticated = conn
+        |> Oidcc.is_authenticated?()
+
         conn
         |> put_flash(:info, "User token refreshed successfully!")
-        |> render(:home, layout: false)
+        |> render(:home, layout: false, authenticated: authenticated)
 
       {:error, error} ->
 
         conn
         |> put_flash(:error, "Token refresh failed: #{inspect error}")
-        |> render(:home, layout: false)
+        |> put_session(:tokens, nil)
+        |> render(:home, layout: false, authenticated: false)
     end
   end
 
   def end_session(conn, _params) do
-    options = %{
-      client_id: SsoTest.Oidcc.ClientConfig.client_id(),
-      end_session_endpoint: SsoTest.Oidcc.ClientConfig.end_session_endpoint(),
-      post_logout_redirect_uri: SsoTest.Oidcc.ClientConfig.post_logout_redirect_url()
-    }
-    case SsoTest.Oidcc.Core.generate_sign_out_uri(options) do
+    case Oidcc.sign_out() do
       {:ok, logout_url} ->
 
+        IO.inspect logout_url, label: "logout url"
+
         conn
-        |> put_flash(:info, "Logout successful!")
+        |> put_session(:tokens, nil)
         |> redirect(external: logout_url)
 
       {:error, error} ->
         conn
         |> put_flash(:info, "Logout uri generation failed #{inspect error}")
-        |> render(:home, layout: false)
+        |> put_session(:tokens, nil)
+        |> render(:home, layout: false, authenticated: false)
     end
   end
 

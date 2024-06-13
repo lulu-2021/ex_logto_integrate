@@ -43,16 +43,8 @@ defmodule SsoTest.Oidcc.Core do
   end
 
   @doc """
+    generate a uri for signing out
   """
-  #def __generate_sign_out_uri(options) do
-  #  with {:ok, uri} <- URI.parse(options.end_session_endpoint),
-  #        queries = URI.query_to_map(uri.query || ""),
-  #        queries = Map.put(queries, "client_id", options.client_id),
-  #        queries = if options.post_logout_redirect_uri != "", do: Map.put(queries, "post_logout_redirect_uri", options.post_logout_redirect_uri), else: queries,
-  #        queries = URI.encode_query(queries),
-  #        do: "#{uri.scheme}://#{uri.host}#{uri.path}?#{queries}"
-  #end
-
   def generate_sign_out_uri(options) do
     case parse_url(options.end_session_endpoint) do
       {:ok, uri} ->
@@ -67,24 +59,6 @@ defmodule SsoTest.Oidcc.Core do
         {:error, error}
     end
   end
-
-  defp build_logout_query(query, options) do
-    query
-    |> decode_query()
-    |> Map.put("cliend_id", options.client_id)
-    |> add_post_logout_uri_to_queries(options)
-    |> uri_encode_queries()
-  end
-
-  defp add_post_logout_uri_to_queries(queries, options) do
-    if options.post_logout_redirect_uri != "" do
-      Map.put(queries, "post_logout_redirect_uri", options.post_logout_redirect_uri)
-    else
-      queries
-    end
-  end
-
-  defp uri_encode_queries(queries), do: URI.encode_query(queries)
 
   @doc """
   Verifies and parses the code from the callback URI.
@@ -169,16 +143,6 @@ defmodule SsoTest.Oidcc.Core do
   - `:organization_id` - The organization ID (optional).
 
   Returns a `%{access_token: ..., refresh_token: ..., ...}` map on success, or an error tuple.
-
-  options = %{
-    client_id: "2a2yi37r08mv2ujr0dhf8",
-    refresh_token: "???", NB - this is meant to come with the initial token request?
-    client_secret: "qPl7Oc8Dxi1VGDDJwYpKjlL7WX99Xemj",
-    token_endpoint: "http://localhost:3001/oidc/token/"
-  }
-  SsoTest.Oidcc.Core.fetch_token_by_refresh_token(options)
-
-
   """
   def fetch_token_by_refresh_token(options) do
     body =
@@ -211,11 +175,11 @@ defmodule SsoTest.Oidcc.Core do
   end
 
   def fetch_user_info(access_token) do
-    user_info_endpoint = ClientConfig.user_info_endpoint()
-
     headers = [{"Authorization", "Bearer #{access_token}"}]
 
-    case HTTPoison.get(user_info_endpoint, headers) do
+    ClientConfig.user_info_endpoint()
+    |> HTTPoison.get(headers)
+    |> case  do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         {:ok, Poison.decode!(body, as: %{})}
 
@@ -228,6 +192,25 @@ defmodule SsoTest.Oidcc.Core do
   end
 
   # ---------- private functions ---------- #
+
+  defp build_logout_query(query, options) do
+    query
+    |> decode_query()
+    |> Map.put("cliend_id", options.client_id)
+    |> add_post_logout_uri_to_queries(options)
+    |> IO.inspect()
+    |> uri_encode_queries()
+  end
+
+  defp add_post_logout_uri_to_queries(queries, options) do
+    if options.post_logout_redirect_uri != "" do
+      Map.put(queries, "post_logout_redirect_uri", options.post_logout_redirect_uri)
+    else
+      queries
+    end
+  end
+
+  defp uri_encode_queries(queries), do: URI.encode_query(queries)
 
   defp build_queries(uri, client_id, redirect_uri, code_challenge, state, scopes, resources, prompt) do
     queries =

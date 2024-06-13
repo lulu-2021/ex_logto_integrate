@@ -43,7 +43,16 @@ defmodule SsoTest.Oidcc.Client do
   end
 
   def sign_out do
-
+    options = %{
+      client_id: ClientConfig.client_id(),
+      end_session_endpoint: ClientConfig.end_session_endpoint(),
+      post_logout_redirect_uri: ClientConfig.post_logout_redirect_url()
+    }
+    case Core.generate_sign_out_uri(options) do
+      {:ok, logout_url} ->
+        {:ok, logout_url}
+      {:error, error} ->
+        {:error, error}
+    end
   end
-
 end

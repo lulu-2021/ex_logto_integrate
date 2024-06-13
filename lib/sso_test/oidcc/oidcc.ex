@@ -3,7 +3,8 @@ defmodule SsoTest.Oidcc do
   @moduledoc """
 
   """
-  alias SsoTest.Oidcc.{Core, Client, ClientConfig, Token}
+  import SsoTest.Oidcc.Generator
+  alias SsoTest.Oidcc.{Core, Client, ClientConfig, Token, RequestUtils}
 
   @doc """
     here the redirect_url should be the callback url in our app..
@@ -16,6 +17,19 @@ defmodule SsoTest.Oidcc do
         {:ok, sign_in_uri}
       {:error, message} ->
         {:error, message}
+    end
+  end
+
+  @doc """
+    handle the sign out process
+  """
+  def sign_out do
+    case Client.sign_out() do
+      {:ok, logout_url} ->
+        {:ok, logout_url}
+
+      {:error, error} ->
+        {:error, error}
     end
   end
 
@@ -55,7 +69,27 @@ defmodule SsoTest.Oidcc do
     end
   end
 
+  def get_origin_request_url(conn), do: RequestUtils.get_origin_request_url(conn)
+
+  def code_verifier, do: generate_code_verifier()
+
+  def code_challenge(code_verifier), do: generate_code_challenge(code_verifier)
+
+  def state, do: generate_state()
+
+  def is_authenticated?(conn) do
+    session_tokens = conn.private.plug_session
+    |> session_tokens()
+
+    IO.inspect session_tokens, label: "authenticated? session tokens"
+
+    session_tokens != nil
+  end
+
   #------ private functions -------#
+
+  defp session_tokens(%{"tokens" => tokens}), do: tokens
+
   defp get_code_verifier(%{"code_verifier" => code_verifier}), do: code_verifier
 
   defp user_info(%{access_token: access_token} = data) do

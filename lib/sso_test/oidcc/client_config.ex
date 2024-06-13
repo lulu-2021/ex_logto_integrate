@@ -5,9 +5,9 @@ defmodule SsoTest.Oidcc.ClientConfig do
   @callback_url "http://lvh.me:4000/page/callback"
   @authorization_endpoint "http://localhost:3001/oidc/auth/"
   @token_endpoint "http://localhost:3001/oidc/token/"
-  @user_info_endpoint "http://localhost:3001/oidc/me"
+  @user_info_endpoint "http://localhost:3001/oidc/me/"
   @end_session_endpoint "http://localhost:3001/oidc/session/end"
-  @post_logout_redirect_url "http://lvh.me:400/"
+  @post_logout_redirect_url "http://lvh.me:4000/"
   @client_id "2a2yi37r08mv2ujr0dhf8"
   @client_secret "qPl7Oc8Dxi1VGDDJwYpKjlL7WX99Xemj"
   @prompt "consent"
@@ -19,7 +19,7 @@ defmodule SsoTest.Oidcc.ClientConfig do
       client_id: @client_id,
       redirect_uri: redirect_uri,
       state: state,
-      scopes: ["openid", "offline_access"],
+      scopes: ["openid", "offline_access", "email", "profile"],
       resources: [],
       prompt: @prompt
     }
