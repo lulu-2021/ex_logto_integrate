@@ -20,6 +20,7 @@ defmodule SsoTestWeb.Router do
     get "/", PageController, :home
 
     get "/page/sso", PageController, :sign_in
+    get "/page/sso/refresh", PageController, :refresh_token
     get "/page/callback", PageController, :callback
   end
 

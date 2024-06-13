@@ -49,15 +49,39 @@ defmodule SsoTestWeb.PageController do
         |> put_session(:tokens, decoded_tokens)
         |> render(:home, layout: false)
 
-      {:error, message} ->
-
-        IO.inspect message, label: "authentication failed:"
+      {:error, error} ->
 
         conn
-        |> put_flash(:error, "user authentication failed!")
+        |> put_flash(:error, "user authentication failed #{inspect error}!")
         |> put_session(:tokens, nil)
         |> render(:home, layout: false)
     end
   end
 
+  def refresh_token(conn, _params) do
+    fetched_conn = conn
+    |> fetch_session()
+
+    session_tokens = fetched_conn.private.plug_session
+    |> session_tokens()
+
+    session_tokens.refresh_token
+    |> Oidcc.refresh_token()
+    |> case do
+      {:ok, tokens} ->
+        IO.inspect tokens, label: "refreshed tokens"
+
+        conn
+        |> put_flash(:info, "User token refreshed successfully!")
+        |> render(:home, layout: false)
+
+      {:error, error} ->
+
+        conn
+        |> put_flash(:error, "Token refresh failed: #{inspect error}")
+        |> render(:home, layout: false)
+    end
+  end
+
+  defp session_tokens(%{"tokens" => tokens}), do: tokens
 end
