@@ -7,21 +7,19 @@ defmodule SsoTestWeb.PageController do
   """
   use SsoTestWeb, :controller
 
-  alias SsoTest.Oidcc
-
   def home(conn, _params) do
     authenticated = conn
-    |> Oidcc.is_authenticated?()
+    |> ExLogto.is_authenticated?()
 
     render(conn, :home, layout: false, authenticated: authenticated)
   end
 
   def sign_in(conn, _params) do
-    code_verifier = Oidcc.code_verifier()
-    code_challenge = Oidcc.code_challenge(code_verifier)
-    state = Oidcc.state()
+    code_verifier = ExLogto.code_verifier()
+    code_challenge = ExLogto.code_challenge(code_verifier)
+    state = ExLogto.state()
 
-    case Oidcc.sign_in(code_verifier, code_challenge, state) do
+    case ExLogto.sign_in(code_verifier, code_challenge, state) do
       {:ok, sign_in_uri} ->
         conn
         |> fetch_session()
@@ -41,10 +39,10 @@ defmodule SsoTestWeb.PageController do
     fetched_conn = conn
     |> fetch_session()
 
-    callback_uri = Oidcc.get_origin_request_url(conn)
+    callback_uri = ExLogto.get_origin_request_url(conn)
 
     fetched_conn.private.plug_session
-    |> Oidcc.handle_signin_callback(callback_uri)
+    |> ExLogto.handle_signin_callback(callback_uri)
     |> case do
       {:ok, decoded_tokens} ->
 
@@ -72,13 +70,13 @@ defmodule SsoTestWeb.PageController do
     |> session_tokens()
 
     session_tokens.refresh_token
-    |> Oidcc.refresh_token()
+    |> ExLogto.refresh_token()
     |> case do
       {:ok, tokens} ->
         IO.inspect tokens, label: "refreshed tokens"
 
         authenticated = conn
-        |> Oidcc.is_authenticated?()
+        |> ExLogto.is_authenticated?()
 
         conn
         |> put_flash(:info, "User token refreshed successfully!")
@@ -94,7 +92,7 @@ defmodule SsoTestWeb.PageController do
   end
 
   def end_session(conn, _params) do
-    case Oidcc.sign_out() do
+    case ExLogto.sign_out() do
       {:ok, logout_url} ->
 
         IO.inspect logout_url, label: "logout url"

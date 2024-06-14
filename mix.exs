@@ -62,7 +62,8 @@ defmodule SsoTest.MixProject do
       {:ssl_verify_fun, "~> 1.1"},
       {:httpoison, "~> 2.2"},
       {:poison, "~> 6.0.0"},
-      {:jose, "~> 1.11"}
+      {:jose, "~> 1.11"},
+      {:ex_logto, path: "/home/lol/Work/clients/itsfound/ex_logto"}
     ]
   end
 

@@ -61,6 +61,16 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+config :ex_logto, :callback_url, "http://lvh.me:4000/page/callback"
+config :ex_logto, :client_id, "2a2yi37r08mv2ujr0dhf8"
+config :ex_logto, :client_secret, "qPl7Oc8Dxi1VGDDJwYpKjlL7WX99Xemj"
+config :ex_logto, :authorization_endpoint, "http://localhost:3001/oidc/auth/"
+config :ex_logto, :token_endpoint, "http://localhost:3001/oidc/token/"
+config :ex_logto, :end_session_endpoint, "http://localhost:3001/oidc/session/end"
+config :ex_logto, :user_info_endpoint, "http://localhost:3001/oidc/me/"
+config :ex_logto, :post_logout_redirect_url, "http://lvh.me:4000/"
+
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
