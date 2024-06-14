@@ -1,9 +1,5 @@
 defmodule SsoTestWeb.PageController do
   @moduledoc """
-
-  - steve
-  - MFcpiiGx
-
   """
   use SsoTestWeb, :controller
 
