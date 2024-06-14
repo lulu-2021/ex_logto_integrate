@@ -64,8 +64,8 @@ config :phoenix, :json_library, Jason
 config :ex_logto, ex_logto_options: [
     callback_url: "http://lvh.me:4000/page/callback",
     post_logout_redirect_url: "http://lvh.me:4000/",
-    client_id: "2a2yi37r08mv2ujr0dhf8",
-    client_secret: "qPl7Oc8Dxi1VGDDJwYpKjlL7WX99Xemj",
+    client_id: "SAMPLE_CLIENT_ID",
+    client_secret: "SAMPLE_CLIENT_SECRET",
     id_server_base: "http://localhost",
     id_server_port: 3001,
     authorization_endpoint: "/oidc/auth/",
