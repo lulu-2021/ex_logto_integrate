@@ -9,7 +9,7 @@ defmodule SsoTestWeb.PageController do
 
   def home(conn, _params) do
     authenticated = conn
-    |> ExLogto.is_authenticated?()
+    |> ExLogto.authenticated?()
 
     render(conn, :home, layout: false, authenticated: authenticated)
   end
@@ -76,7 +76,7 @@ defmodule SsoTestWeb.PageController do
         IO.inspect tokens, label: "refreshed tokens"
 
         authenticated = conn
-        |> ExLogto.is_authenticated?()
+        |> ExLogto.authenticated?()
 
         conn
         |> put_flash(:info, "User token refreshed successfully!")
