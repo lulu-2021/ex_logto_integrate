@@ -2,10 +2,10 @@ import Config
 
 # Configure your database
 config :sso_test, SsoTest.Repo,
-  username: "postgres",
-  password: "CalamityIcelandBucket",
-  hostname: "192.168.10.200",
-  database: "sso_test_dev",
+  username: System.get_env("PG_USERNAME"),
+  password: System.get_env("PG_PASSWORD"),
+  hostname: System.get_env("PG_HOSTNAME"),
+  database: System.get_env("PG_DATABASE"),
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10

@@ -62,16 +62,16 @@ config :logger, :console,
 config :phoenix, :json_library, Jason
 
 config :ex_logto, ex_logto_options: [
-    callback_url: "http://lvh.me:4000/page/callback",
-    post_logout_redirect_url: "http://lvh.me:4000/",
-    client_id: "SAMPLE_CLIENT_ID",
-    client_secret: "SAMPLE_CLIENT_SECRET",
-    id_server_base: "http://localhost",
-    id_server_port: 3001,
-    authorization_endpoint: "/oidc/auth/",
-    token_endpoint: "/oidc/token/",
-    end_session_endpoint: "/oidc/session/end",
-    user_info_endpoint: "/oidc/me/"
+    callback_url: System.get_env("CALLBACK_URL"),
+    post_logout_redirect_url: System.get_env("POST_LOGOUT_REDIRECT_URL"),
+    client_id: System.get_env("CLIENT_ID"),
+    client_secret: System.get_env("CLIENT_SECRET"),
+    id_server_base: System.get_env("ID_SERVER_BASE"),
+    id_server_port: System.get_env("ID_SERVER_PORT"),
+    authorization_endpoint: System.get_env("AUTHORIZATION_ENDPOINT"),
+    token_endpoint: System.get_env("TOKEN_ENDPOINT"),
+    end_session_endpoint: System.get_env("END_SESSION_ENDPOINT"),
+    user_info_endpoint: System.get_env("USER_INFO_ENDPOINT")
   ]
 
 # Import environment specific config. This must remain at the bottom
