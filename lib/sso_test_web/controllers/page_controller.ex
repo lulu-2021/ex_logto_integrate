@@ -7,7 +7,11 @@ defmodule SsoTestWeb.PageController do
     authenticated = conn
     |> ExLogto.authenticated?()
 
-    render(conn, :home, layout: false, authenticated: authenticated)
+    user_info = conn
+    |> tokens_from_conn()
+    |> user_info
+
+    render(conn, :home, layout: false, authenticated: authenticated, user_info: user_info)
   end
 
   def sign_in(conn, _params) do
@@ -41,13 +45,15 @@ defmodule SsoTestWeb.PageController do
     |> ExLogto.handle_signin_callback(callback_uri)
     |> case do
       {:ok, decoded_tokens} ->
-
         IO.inspect decoded_tokens, label: "decoded tokens"
+
+        user_info = decoded_tokens
+        |> user_info
 
         conn
         |> put_flash(:info, "user authenticated successfully!")
         |> put_session(:tokens, decoded_tokens)
-        |> render(:home, layout: false, authenticated: true)
+        |> render(:home, layout: false, authenticated: true, user_info: user_info)
 
       {:error, error} ->
 
@@ -59,24 +65,23 @@ defmodule SsoTestWeb.PageController do
   end
 
   def refresh_token(conn, _params) do
-    fetched_conn = conn
-    |> fetch_session()
-
-    session_tokens = fetched_conn.private.plug_session
-    |> session_tokens()
+    session_tokens = tokens_from_conn(conn)
 
     session_tokens.refresh_token
     |> ExLogto.refresh_token()
     |> case do
-      {:ok, tokens} ->
-        IO.inspect tokens, label: "refreshed tokens"
+      {:ok, refreshed_tokens} ->
+        #IO.inspect refreshed_tokens, label: "refreshed tokens"
 
         authenticated = conn
         |> ExLogto.authenticated?()
 
+        user_info = refreshed_tokens
+        |> user_info
+
         conn
         |> put_flash(:info, "User token refreshed successfully!")
-        |> render(:home, layout: false, authenticated: authenticated)
+        |> render(:home, layout: false, authenticated: authenticated, user_info: user_info)
 
       {:error, error} ->
 
@@ -105,5 +110,17 @@ defmodule SsoTestWeb.PageController do
     end
   end
 
+  # ---------- private functions ---------- #
+
+  defp tokens_from_conn(conn) do
+    fetched_conn = conn
+    |> fetch_session()
+
+    fetched_conn.private.plug_session
+    |> session_tokens()
+  end
+
   defp session_tokens(%{"tokens" => tokens}), do: tokens
+  defp user_info(%{user_info: user}), do: user
+  defp user_info(_empty), do: nil
 end

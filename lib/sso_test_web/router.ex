@@ -23,6 +23,7 @@ defmodule SsoTestWeb.Router do
     get "/page/sso/refresh", PageController, :refresh_token
     get "/page/sso/end_session", PageController, :end_session
     get "/page/callback", PageController, :callback
+    get "/signout", PageController, :sign_out
   end
 
   # Other scopes may use custom stacks.
