@@ -31,4 +31,4 @@ WORKDIR /app
 #
 USER $DOCKER_USER:$DOCKER_USER
 #
-CMD mix deps.get && iex -S mix phx.server
+CMD mix deps.get && mix phx.server
