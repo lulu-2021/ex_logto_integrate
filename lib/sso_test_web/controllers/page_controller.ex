@@ -121,6 +121,7 @@ defmodule SsoTestWeb.PageController do
   end
 
   defp session_tokens(%{"tokens" => tokens}), do: tokens
+  defp session_tokens(_), do: nil
   defp user_info(%{user_info: user}), do: user
   defp user_info(_empty), do: nil
 end

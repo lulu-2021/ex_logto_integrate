@@ -1,0 +1,23 @@
+version: "3.5"
+services:
+  sso_test_base_build:
+    build:
+      context: .
+      args:
+        - DOCKER_USER=${DOCKER_USER}
+        - DOCKER_USER_UID=${DOCKER_USER_UID}
+        - DOCKER_USER_GID=${DOCKER_USER_GID}
+      dockerfile: ./Dockerfile.base_build
+    ports:
+      - "4000:4000"
+    environment:
+      - MIX_ENV=dev
+    volumes:
+      - .:/app
+
+    networks:
+      - localnet
+
+networks:
+  localnet:
+    external: true

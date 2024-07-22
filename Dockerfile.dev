@@ -1,0 +1,34 @@
+ARG REGISTRY
+#
+FROM ${REGISTRY}sso_test_base_build as sso_test_app
+#
+# after each FROM args that are used must be re-stated...
+#
+ARG DOCKER_USER
+#
+# set the working directory & copy the source
+#
+RUN mkdir /app
+#
+RUN chown -R $DOCKER_USER:$DOCKER_USER /app
+#
+USER $DOCKER_USER:$DOCKER_USER
+#
+RUN mix local.hex --force
+RUN mix local.rebar --force
+#
+WORKDIR /app
+#
+# copy the bare essentials - so we can get the dependencies & start PHX
+#
+COPY --chown=$DOCKER_USER mix.exs .
+COPY --chown=$DOCKER_USER mix.lock .
+#
+# install the "node_modules"
+#
+USER root
+WORKDIR /app
+#
+USER $DOCKER_USER:$DOCKER_USER
+#
+CMD mix deps.get && iex -S mix phx.server

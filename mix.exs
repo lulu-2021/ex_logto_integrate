@@ -58,8 +58,8 @@ defmodule SsoTest.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.2"},
-      {:ex_logto,"~> 0.1.3", path: "/home/lol/Work/clients/itsfound/ex_logto"}
-      #{:ex_logto,"~> 0.1.3", git: "git@github.com:lulu-2021/ex_logto.git"}
+      #{:ex_logto,"~> 0.1.3", path: "/home/lol/Work/clients/itsfound/ex_logto"}
+      {:ex_logto, "~> 0.1.3"}
     ]
   end
 

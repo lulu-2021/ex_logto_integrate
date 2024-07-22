@@ -1,0 +1,38 @@
+version: "3.5"
+services:
+  sso_test:
+    build:
+      context: .
+      args:
+        - DOCKER_USER=${DOCKER_USER}
+        - DOCKER_USER_UID=${DOCKER_USER_UID}
+        - DOCKER_USER_GID=${DOCKER_USER_GID}
+        - REGISTRY=${REGISTRY}
+      dockerfile: ./Dockerfile.dev
+    ports:
+      - "4000:4000"
+    environment:
+      - MIX_ENV=dev
+      - CALLBACK_URL=${CALLBACK_URL}
+      - POST_LOGOUT_REDIRECT_URL=${POST_LOGOUT_REDIRECT_URL}
+      - CLIENT_ID=${CLIENT_ID}
+      - CLIENT_SECRET=${CLIENT_SECRET}
+      - ID_SERVER_BASE=${ID_SERVER_BASE}
+      - ID_SERVER_PORT=${ID_SERVER_PORT}
+      - AUTHORIZATION_ENDPOINT=${AUTHORIZATION_ENDPOINT}
+      - TOKEN_ENDPOINT=${TOKEN_ENDPOINT}
+      - END_SESSION_ENDPOINT=${END_SESSION_ENDPOINT}
+      - USER_INFO_ENDPOINT=${USER_INFO_ENDPOINT}
+      - PG_USERNAME=${PG_USERNAME}
+      - PG_PASSWORD=${PG_PASSWORD}
+      - PG_HOSTNAME=${PG_HOSTNAME}
+      - PG_DATABASE=${PG_DATABASE}
+    volumes:
+      - .:/app
+
+    networks:
+      - localnet
+
+networks:
+  localnet:
+    external: true

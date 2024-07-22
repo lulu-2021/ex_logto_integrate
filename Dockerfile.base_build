@@ -1,0 +1,24 @@
+ARG ALPINE_VERSION=3.20.1
+ARG ELIXIR_VERSION=1.16.3
+ARG ERLANG_VERSION=25.3.2.9
+#
+FROM hexpm/elixir:${ELIXIR_VERSION}-erlang-${ERLANG_VERSION}-alpine-${ALPINE_VERSION} as build
+#
+# Set the user up we will use for DEV work - this ensures that our local files will have the same permissions as the docker ones
+# as the same as the local user - we must first repeat the args stated at the top - after a FROM
+#
+ARG DOCKER_USER
+ARG DOCKER_USER_UID
+ARG DOCKER_USER_GID
+#
+RUN /bin/echo ${DOCKER_USER_GID}
+RUN /bin/echo ${DOCKER_USER_UID}
+RUN /bin/echo ${DOCKER_USER}
+#
+RUN addgroup --gid ${DOCKER_USER_GID} ${DOCKER_USER} \
+    && adduser -D --uid ${DOCKER_USER_UID} --ingroup ${DOCKER_USER} -g "developer" ${DOCKER_USER} -s /bin/sh
+
+#
+# install dev/js dependencies
+#
+RUN apk update && apk add --no-cache git shadow bash inotify-tools
