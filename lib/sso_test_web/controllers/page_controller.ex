@@ -110,6 +110,12 @@ defmodule SsoTestWeb.PageController do
     end
   end
 
+  def signed_out(conn, _params) do
+    conn
+    |> put_session(:tokens, nil)
+    |> render(:home, layout: false, authenticated: false)
+  end
+
   # ---------- private functions ---------- #
 
   defp tokens_from_conn(conn) do

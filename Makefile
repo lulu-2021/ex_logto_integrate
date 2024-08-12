@@ -28,7 +28,7 @@ docker/up:
 # run the dockerised DEV environment & make the iex console available
 #
 docker/iex:
-	docker-compose -f docker-compose-dev.yml run --rm -p 4000:4000  sso_test iex -S mix	
+	docker-compose -f docker-compose-dev.yml run --rm -p 4000:4000  sso_test iex -S mix	phx.server
 
 # run "mix test" within the docker environment - i.e. All the unit/tests for the whole app are run
 # IF you want to test a single unit test file: run "mix test" for a single unit test file - passed as an argument like this:
